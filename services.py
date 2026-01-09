@@ -1,19 +1,30 @@
 """Wallet class"""
-# TODO
-# wallet class
+
+import datetime
+from database import db
+
+# TODO 10/1
+# check correct balance and values if not raise errors
+
 CATEGORIES = ("Food", "House", "Bills", "Shopping", "Leisure", "Travel")
 
 # convert currencies
-# to do add API to get current value
+# TODO add API to get current value
+# https://exchangeratesapi.io/
+
 def convert_currency(amount, from_c, to_c):
     if from_c == "UYU" and to_c == "USD":
         return amount*40.0
 
 class Wallet:
-    """Wallet class with income, expenses"""
+    """Wallet class with income, expenses and stores on a database"""
     def __init__(self, user_id, balance=0):
         self.user_id = user_id
         self._balance = balance
+        # create wallet for user
+        db.execute(
+        "INSERT INTO wallet (user_id, balance)"
+        " VALUES (?, ?)", self.user_id, balance)
         # create category of expenses
         self.categories = CATEGORIES
 
@@ -31,15 +42,28 @@ class Wallet:
         self._balance = value
     # add transaction
     def transaction(self, type, amount, currency="USD", category =None, description =None):
+        # add transaction to db
+        db.execute(
+        "INSERT INTO transactions (user_id, type, date, amount, currency)" \
+        " VALUES (?, ?, ?, ?, ?)", 
+        self.user_id,
+        type,
+        datetime.date.today().isoformat(),
+        amount, 
+        currency)
         # add amount to total if income
         if type == "Income":
             if currency == "USD":
                 self.balance += amount
             else:
-                self.balance += convert(amount, currency, "USD")
+                self.balance += convert_currency(amount, currency, "USD")
         elif type == "Expenses":
-            # update total
             self.balance -= amount
+        # update wallet
+        db.execute("UPDATE wallet SET balance = ?" \
+        " WHERE user_id = ?",
+        self.balance,
+        self.user_id)
 
 def main():
     federico = Wallet(1, 1000)

@@ -1,7 +1,6 @@
 """Main program. Command line program that permits a user to create a wallet, 
 make transactions, output transactions and wallet info on a csv file and some matplot graphs"""
 
-from database import db
 from services import Wallet
 
 def main():
