@@ -41,23 +41,23 @@ class Wallet:
             raise ValueError("please put value")
         self._balance = value
     # add transaction
-    def transaction(self, type, amount, currency="USD", category =None, description =None):
+    def transaction(self, tx_ype, amount, currency="USD", category =None, description =None):
         # add transaction to db
         db.execute(
-        "INSERT INTO transactions (user_id, type, date, amount, currency)" \
+        "INSERT INTO transactions (user_id, tx_type, date, amount, currency)" \
         " VALUES (?, ?, ?, ?, ?)", 
         self.user_id,
-        type,
+        tx_type,
         datetime.date.today().isoformat(),
         amount, 
         currency)
         # add amount to total if income
-        if type == "Income":
+        if tx_type == "Income":
             if currency == "USD":
                 self.balance += amount
             else:
                 self.balance += convert_currency(amount, currency, "USD")
-        elif type == "Expenses":
+        elif tx_type == "Expenses":
             self.balance -= amount
         # update wallet
         db.execute("UPDATE wallet SET balance = ?" \
