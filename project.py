@@ -6,8 +6,8 @@ from database import db
 # TODO correct expections and raise errors
 
 def main():
-    print("\n\n")
-    print("Welcome to wallet. A command line app for tracking income and expenses\n" \
+    print("\n")
+    print("Welcome to wallet. A command line program for tracking income and expenses\n" \
     "Enter your last name and name. Then select option by pressing the number. \n")
     # create user
     last_name, email, amount = create_user()
