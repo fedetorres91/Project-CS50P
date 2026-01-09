@@ -3,7 +3,7 @@ from cs50 import SQL
  SCHEMA:
  table users (id, email, first name, last name, currency)
  table wallet (user_id, balance, currency)
- table transactions(id, user_id, type, date, amount, currency, category, description)"""
+ table transactions(id, user_id, tx_type, date, amount, currency, category, description)"""
 
 # open db
 db = SQL("sqlite:///wallet.db")

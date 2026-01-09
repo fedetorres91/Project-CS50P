@@ -24,7 +24,7 @@ class Wallet:
         # create wallet for user
         db.execute(
         "INSERT INTO wallet (user_id, balance)"
-        " VALUES (?, ?)", self.user_id, balance)
+        " VALUES (?, ?)", self.user_id, self._balance)
         # create category of expenses
         self.categories = CATEGORIES
 
@@ -41,7 +41,7 @@ class Wallet:
             raise ValueError("please put value")
         self._balance = value
     # add transaction
-    def transaction(self, tx_ype, amount, currency="USD", category =None, description =None):
+    def transaction(self, tx_type, amount, currency="USD", category =None, description =None):
         # add transaction to db
         db.execute(
         "INSERT INTO transactions (user_id, tx_type, date, amount, currency)" \
