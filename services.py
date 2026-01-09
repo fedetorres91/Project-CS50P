@@ -11,42 +11,42 @@ def convert_currency(amount, from_c, to_c):
 
 class Wallet:
     """Wallet class with income, expenses"""
-    def __init__(self, user_id, total=0):
+    def __init__(self, user_id, balance=0):
         self.user_id = user_id
-        self._total = total;
+        self._balance = balance
         # create category of expenses
         self.categories = CATEGORIES
 
     # getter
     @property
-    def total(self):
-        return self._total
+    def balance(self):
+        return self._balance
 
     # setter
     # check if value is valid else raise error
-    @total.setter
-    def total(self, value):
+    @balance.setter
+    def balance(self, value):
         if not value:
             raise ValueError("please put value")
-        self._total = value
-    # add income
-    def add_income(self, amount, currency="USD"):
-        # add amount to total
-        if currency == "USD":
-            self.total += amount
-        else:
-            self.total += convert(amount, currency, "USD")
-
-    def make_expense(self, amount, currency='USD', category=None, description=None):
-        # update total
-        self.total -= amount
+        self._balance = value
+    # add transaction
+    def transaction(self, type, amount, currency="USD", category =None, description =None):
+        # add amount to total if income
+        if type == "Income":
+            if currency == "USD":
+                self.balance += amount
+            else:
+                self.balance += convert(amount, currency, "USD")
+        elif type == "Expenses":
+            # update total
+            self.balance -= amount
 
 def main():
     federico = Wallet(1, 1000)
     print(federico.categories)
-    federico.add_income(500)
-    federico.make_expense(100, category='Travel')
-    print(f"{federico.total} USD")
+    federico.transaction("Income", 500)
+    federico.transaction("Expenses", 100, category='Travel')
+    print(f"{federico.balance} USD")
 
 if __name__ == '__main__':
     main()

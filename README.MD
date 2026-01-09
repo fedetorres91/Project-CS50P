@@ -1,2 +1,2 @@
-wallet, income, expenses, graphs
-ai llm assistant
+Command line program that permits a user to create a wallet, make transactions, output transactions and wallet info on a csv file and some matplot graphs.
+TODO matplot graphs, and llm api assistant to provide basic financial advice
