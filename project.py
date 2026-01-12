@@ -4,7 +4,7 @@ make transactions, output transactions and wallet info on a csv file and some ba
 from services import Wallet
 from database import db
 # TODO correct expcetions and raise errors
-# TODO 12/1 make unit tests, create user/password
+# TODO 12/1 make unit tests
 # TODO 13/1 output csv file
 
 def main():
@@ -65,27 +65,22 @@ def create_user():
     print("Please create a user.")
     # take last_name, email (required), optional first_name, currency)
     username, password, amount = None, None, None
+
     while username is None:
         username = input("Create username:\n")
-        if username is not None:
-            valid_username = True
-            # check username does not exist on db
-            try:
-                check_username = db.execute("SELECT username FROM users WHERE username = ?", username)[0]["username"]
-                if check_username is not None:
-                    valid_username = False
-                    print(f"Incorrect username. {username} already exists.")
-            except IndexError:
-                pass
-        if not valid_username:
+        if username_exists(username):
+            print(f"Incorrect username. {username} already exists.")
             username = None
+
     # create password
     while password is None:
         password = input("Choose a password:\n")
     password_confirmed = False
     while not password_confirmed:
         password_confirmed = input("Confirm password:\n") == password
+    
     print(f"User created succesfully. Welcome {username}.\n")
+    
     while True:
         amount = input("Enter initial balance:\n")
         try:
@@ -103,6 +98,11 @@ def create_user():
     wallet = create_wallet(user_id, amount)
     logged_in=True
     return(username, password, amount, wallet, logged_in)
+
+def username_exists(username):
+    """Returns True if username exists in database"""
+    result = db.execute("SELECT username FROM users WHERE username = ?", username)
+    return len(result) > 0
 
 def create_wallet(user_id, amount):
     """Creates a wallet instance given an user_id and initial amount"""
