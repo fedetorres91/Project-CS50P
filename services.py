@@ -44,13 +44,15 @@ class Wallet:
     def transaction(self, tx_type, amount, currency="USD", category =None, description =None):
         # add transaction to db
         db.execute(
-        "INSERT INTO transactions (user_id, tx_type, date, amount, currency)" \
-        " VALUES (?, ?, ?, ?, ?)", 
+        "INSERT INTO transactions (user_id, tx_type, date, amount, currency, category, description)" \
+        " VALUES (?, ?, ?, ?, ?, ?, ?)", 
         self.user_id,
         tx_type,
         datetime.date.today().isoformat(),
         amount, 
-        currency)
+        currency,
+        category, 
+        description)
         # add amount to total if income
         if tx_type == "Income":
             if currency == "USD":
