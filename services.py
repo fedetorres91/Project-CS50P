@@ -1,78 +1,30 @@
-"""Wallet class"""
+"""Integrates class wallet with db"""
 
-import datetime
-from database import db
+from models import Wallet
+from database import WalletRepository
 
-# TODO 10/1
-# check correct balance and values if not raise errors
+def create_wallet(user_id, amount):
+    """creates """
+    # create wallet instance
+    wallet = Wallet(user_id, amount)
+    # save to database
+    wallet_repo = WalletRepository.create(user_id, amount)
+    return wallet
 
-CATEGORIES = ("Food", "House", "Bills", "Shopping", "Leisure", "Travel")
+def add_income(user_id, wallet, amount, currency="USD", category =None, description =None):):
+    """adds income to instance and updates db"""
+    wallet = wallet
+    # updates instance
+    if currency == "USD":
+        wallet.balance += amount
+    else:
+        wallet.balance += convert_currency(amount, currency, "USD")
+    
+    # insert transaction and update balance on db
+    wallet = wallet_repo.load(user_id)
+    wallet.add_income(amount)
+    tx_repo.save_income(user_id, amount)
+    wallet_repo.save(user_id, wallet)
 
-# convert currencies
-# TODO add API to get current value
-# https://exchangeratesapi.io/
 
-def convert_currency(amount, from_c, to_c):
-    if from_c == "UYU" and to_c == "USD":
-        return amount*40.0
 
-class Wallet:
-    """Wallet class with income, expenses and stores on a database"""
-    def __init__(self, user_id, balance=0):
-        self.user_id = user_id
-        self._balance = balance
-        # create wallet for user
-        db.execute(
-        "INSERT INTO wallet (user_id, balance)"
-        " VALUES (?, ?)", self.user_id, self._balance)
-        # create category of expenses
-        self.categories = CATEGORIES
-
-    # getter
-    @property
-    def balance(self):
-        return self._balance
-
-    # setter
-    # check if value is valid else raise error
-    @balance.setter
-    def balance(self, value):
-        if not value:
-            raise ValueError("please put value")
-        self._balance = value
-    # add transaction
-    def transaction(self, tx_type, amount, currency="USD", category =None, description =None):
-        # add transaction to db
-        db.execute(
-        "INSERT INTO transactions (user_id, tx_type, date, amount, currency, category, description)" \
-        " VALUES (?, ?, ?, ?, ?, ?, ?)", 
-        self.user_id,
-        tx_type,
-        datetime.date.today().isoformat(),
-        amount, 
-        currency,
-        category, 
-        description)
-        # add amount to total if income
-        if tx_type == "Income":
-            if currency == "USD":
-                self.balance += amount
-            else:
-                self.balance += convert_currency(amount, currency, "USD")
-        elif tx_type == "Expenses":
-            self.balance -= amount
-        # update wallet
-        db.execute("UPDATE wallet SET balance = ?" \
-        " WHERE user_id = ?",
-        self.balance,
-        self.user_id)
-
-def main():
-    federico = Wallet(1, 1000)
-    print(federico.categories)
-    federico.transaction("Income", 500)
-    federico.transaction("Expenses", 100, category='Travel')
-    print(f"{federico.balance} USD")
-
-if __name__ == '__main__':
-    main()

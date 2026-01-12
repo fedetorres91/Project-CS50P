@@ -1,7 +1,7 @@
 """Main program. Command line program that permits a user to create a wallet, 
 make transactions, output transactions and wallet info on a csv file and some basic matplot graphs"""
 
-from services import Wallet
+from models import Wallet
 from database import db
 # TODO correct expcetions and raise errors
 # TODO 12/1 make unit tests
