@@ -1,3 +1,4 @@
+from datetime import date
 from cs50 import SQL
 """ CREATE DATABASE 
  SCHEMA:
@@ -34,8 +35,6 @@ class WalletRepository:
         )[0]
         return Wallet(balance=row["balance"])
 
-    
-
     def save(self, user_id: int, wallet: Wallet):
         """updates wallet table on db"""
         db.execute(
@@ -47,11 +46,11 @@ class TransactionRepository:
     def save_income(self, user_id, amount):
         db.execute(
             "INSERT INTO transactions (user_id, tx_type, amount, date) VALUES (?, ?, ?, ?)",
-            user_id, "income", amount, today()
+            user_id, "income", amount, date.today().isoformat()
         )
 
     def save_expense(self, user_id, amount, category, description):
         db.execute(
             "INSERT INTO transactions (user_id, tx_type, amount, category, description, date) VALUES (?, ?, ?, ?, ?, ?)",
-            user_id, "expense", amount, category, description, today()
+            user_id, "expense", amount, category, description, date.today().isoformat()
         )
