@@ -16,7 +16,7 @@ def convert_currency(amount, from_c, to_c):
 class Wallet:
     """Wallet class - manages balance only"""
     def __init__(self, balance=0):
-        self._balance = balance
+        self.balance = balance
 
     # getter
     @property
