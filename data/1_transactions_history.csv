@@ -1,0 +1,4 @@
+id,balance,user_id,tx_type,amount,category,description,date,balance_after
+1,9971.0,1,expense,509.0,4,reebok,2026-01-23T18:17:45.540647,9971.0
+1,9971.0,1,expense,20.0,1,mcdonalds,2026-01-23T18:17:27.309878,10480.0
+1,9971.0,1,income,500.0,,,2026-01-23T18:17:13.594013,10500.0

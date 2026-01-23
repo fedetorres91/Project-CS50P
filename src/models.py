@@ -13,6 +13,12 @@ def convert_currency(amount, from_c, to_c):
     if from_c == "UYU" and to_c == "USD":
         return amount*40.0
 
+# check amount valid positive number
+def valid_amount(amount):
+    if not isinstance(amount, (int, float)) or isinstance(amount, bool) or amount <= 0:
+        raise ValueError("Amount must be a positive number.")
+    return True
+
 class Wallet:
     """Wallet class - manages balance only"""
     def __init__(self, balance=0):
@@ -33,18 +39,13 @@ class Wallet:
 
     def add_income(self, amount):
         """Add income to balance"""
-        if not isinstance(amount, (int, float)) or isinstance(amount, bool):
-            raise ValueError("Amount must be a number")
-        if amount <= 0:
-            raise ValueError("Income must be positive")
+        # check correct amount
+        valid_amount(amount)
         self._balance += amount
     
     def add_expense(self, amount):
         """Add income to balance"""
-        if not isinstance(amount, (int, float)) or isinstance(amount, bool):
-            raise ValueError("Amount must be a number")
-        if amount <= 0:
-            raise ValueError("Income must be positive")
+        valid_amount(amount)
         if amount > self.balance:
             raise ValueError("Insufficient balance")
         self._balance -= amount
@@ -54,6 +55,7 @@ class Transactions:
     def __init__(self, tx_type, amount, currency="USD", category=None, description=""):
         if tx_type not in ("income", "expense"):
             raise ValueError("Type must be 'income' or 'expense'")
+        valid_amount(amount)
         self.type = tx_type
         self.amount = amount
         self.currency = currency

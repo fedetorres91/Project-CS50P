@@ -1,8 +1,9 @@
 """Command line interface for wallet application."""
 
-import services
-import user_service
-from models import CATEGORIES
+from src import services
+from src import user_service
+from src.models import CATEGORIES
+from getpass import getpass
 
 
 def main():
@@ -54,7 +55,7 @@ def log_in():
     while username is None:
         username = input("Enter username:\n")
     while password is None:
-        password = input("Enter password:\n")
+        password = getpass("Enter password:\n")
     return user_service.log_in(username, password)
 
 
@@ -71,10 +72,10 @@ def create_user():
 
     # create password
     while password is None:
-        password = input("Choose a password:\n")
+        password = getpass("Choose a password:\n")
     password_confirmed = False
     while not password_confirmed:
-        password_confirmed = input("Confirm password:\n") == password
+        password_confirmed = getpass("Confirm password:\n") == password
 
     user_id = user_service.create_user(username, password)
     logged_in = True
@@ -120,12 +121,15 @@ def make_transaction(user_id, wallet, action):
     """Make income or expense transaction."""
     if action == 1:
         amount = get_amount_input()
-        services.add_income(user_id, wallet, amount)
-        print(f"Successfully added {amount} to balance")
+        try:
+            services.add_income(user_id, wallet, amount)
+            print(f"Successfully added {amount} to balance")
+        except ValueError as e:
+            print(f"Error: {e}")
         return
+
     elif action == 2:
         amount = get_amount_input()
-        
         # Build category menu from CATEGORIES constant
         category_menu = "Choose appropriate category of expense:\n"
         for i, cat in enumerate(CATEGORIES, 1):
@@ -135,14 +139,23 @@ def make_transaction(user_id, wallet, action):
         category = input(category_menu)
         description = input("Add description. Otherwise press enter: ")
         
-        services.add_expense(user_id, wallet, amount, category=category, description=description)
-        print(f"Successfully added {amount} expense")
+        try: 
+            services.add_expense(user_id, wallet, amount, category=category, description=description)
+            print(f"Successfully added {amount} expense")
+        except ValueError as e:
+            print(f"Error: {e}")
         return
-    # TODO save_transaction_history
+    
+    elif action == 4:
+        try:
+            services.export_transactions_to_csv(user_id)
+            print("Transaction history saved.")
+        except ValueError:
+            print("Transaction history is empty.")
+
     else:
         return
 
 
 # TODO
-# def save_transaction_history
-# function that saves a csv file with transaction history of the user.
+# print matplot lib of transaction category and balance history

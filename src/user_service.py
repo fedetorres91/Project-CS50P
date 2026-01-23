@@ -1,7 +1,8 @@
 """User and wallet helpers for CLI layer."""
 
-from database import db, WalletRepository
-from models import Wallet
+from werkzeug.security import generate_password_hash, check_password_hash
+from src.database import db, WalletRepository
+from src.models import Wallet
 
 # DB auth helpers
 
@@ -11,16 +12,24 @@ def username_exists(username: str) -> bool:
 
 
 def create_user(username: str, password: str) -> int:
-    db.execute("INSERT INTO users (username, password) VALUES (?, ?)", username, password)
+    """Create a user with a hashed password"""
+    hashed_password = generate_password_hash(password)
+    db.execute("INSERT INTO users (username, password) VALUES (?, ?)", username, hashed_password)
     user_row = db.execute("SELECT id FROM users WHERE username = ?", username)[0]
     return user_row["id"]
 
 
 def log_in(username: str, password: str):
-    rows = db.execute("SELECT id, username FROM users WHERE username = ? AND password = ?", username, password)
+    """Authenticate user by checking hashed password"""
+    rows = db.execute("SELECT id, username, password FROM users WHERE username = ?", username)
     if not rows:
         return None
-    return (rows[0]["id"], rows[0]["username"])
+    
+    # Check if provided password matches the stored hash
+    if check_password_hash(rows[0]["password"], password):
+        return (rows[0]["id"], rows[0]["username"])
+    
+    return None
 
 
 # Wallet helpers

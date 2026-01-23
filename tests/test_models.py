@@ -72,7 +72,21 @@ def test_incorrect_expense():
     with pytest.raises(ValueError):
         w.add_expense(-10)
 
-# TODO
-# transatcions unit test
+# test transatcions
+
+def test_correct_transaction():
+    t1 = Transactions("income", 10)
+    t2 = Transactions("expense", 20)
+    assert t1.amount == 10
+    assert t2.amount == 20
+def test_incorrect_tx_type():
+    with pytest.raises(ValueError):
+        t = Transactions("gastos", 10)
+def test_incorrect_amount():
+    with pytest.raises(TypeError):
+        t = Transactions("income")
+    with pytest.raises(ValueError):
+        t = Transactions("income", "ten")
+
 
 
