@@ -7,12 +7,28 @@ from src.models import Wallet
 # DB auth helpers
 
 def username_exists(username: str) -> bool:
+    """Check if a username already exists in the database.
+    
+    Args:
+        username (str): The username to check.
+    
+    Returns:
+        bool: True if username exists, False otherwise.
+    """
     result = db.execute("SELECT username FROM users WHERE username = ?", username)
     return len(result) > 0
 
 
 def create_user(username: str, password: str) -> int:
-    """Create a user with a hashed password"""
+    """Create a new user account with hashed password.
+    
+    Args:
+        username (str): The username for the new account.
+        password (str): The plaintext password (will be hashed).
+    
+    Returns:
+        int: The user ID of the newly created user.
+    """
     hashed_password = generate_password_hash(password)
     db.execute("INSERT INTO users (username, password) VALUES (?, ?)", username, hashed_password)
     user_row = db.execute("SELECT id FROM users WHERE username = ?", username)[0]
@@ -20,7 +36,15 @@ def create_user(username: str, password: str) -> int:
 
 
 def log_in(username: str, password: str):
-    """Authenticate user by checking hashed password"""
+    """Authenticate a user by verifying username and password.
+    
+    Args:
+        username (str): The username to authenticate.
+        password (str): The plaintext password to verify.
+    
+    Returns:
+        tuple: (user_id, username) if authentication succeeds, None if credentials invalid.
+    """
     rows = db.execute("SELECT id, username, password FROM users WHERE username = ?", username)
     if not rows:
         return None
@@ -37,9 +61,26 @@ def log_in(username: str, password: str):
 _wallet_repo = WalletRepository()
 
 def create_wallet(user_id: int, initial_balance: float) -> Wallet:
+    """Create a new wallet for a user with an initial balance.
+    
+    Args:
+        user_id (int): The ID of the user.
+        initial_balance (float): The starting balance for the wallet.
+    
+    Returns:
+        Wallet: The newly created wallet object.
+    """
     _wallet_repo.create_wallet(user_id, initial_balance)
     return _wallet_repo.load(user_id)
 
 
 def load_wallet(user_id: int) -> Wallet:
+    """Load a user's wallet from the database.
+    
+    Args:
+        user_id (int): The ID of the user.
+    
+    Returns:
+        Wallet: The loaded wallet object with current balance.
+    """
     return _wallet_repo.load(user_id)

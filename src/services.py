@@ -9,14 +9,32 @@ _tx_repo = TransactionRepository()
 
 
 def create_wallet(user_id, amount):
-    """Create and save on database a wallet for the user."""
+    """Create and persist a new wallet for a user.
+    
+    Args:
+        user_id (int): The ID of the user.
+        amount (float): The initial wallet balance.
+    
+    Returns:
+        Wallet: The newly created wallet object.
+    """
     wallet = Wallet(amount)
     _wallet_repo.create_wallet(user_id, amount)
     return wallet
 
 
 def add_income(user_id, wallet, amount, currency="USD"):
-    """Add income to wallet and save on database transaction and balance."""
+    """Record income transaction and update wallet balance in database.
+    
+    Args:
+        user_id (int): The ID of the user.
+        wallet (Wallet): The user's wallet object.
+        amount (float): The income amount.
+        currency (str): Currency code; defaults to 'USD'.
+    
+    Raises:
+        ValueError: If amount is invalid.
+    """
     if currency == "USD":
         wallet.add_income(amount)
     else:
@@ -28,7 +46,19 @@ def add_income(user_id, wallet, amount, currency="USD"):
 
 
 def add_expense(user_id, wallet, amount, currency="USD", category=None, description=None):
-    """Add expense to wallet and save on database transaction and balance."""
+    """Record expense transaction and update wallet balance in database.
+    
+    Args:
+        user_id (int): The ID of the user.
+        wallet (Wallet): The user's wallet object.
+        amount (float): The expense amount.
+        currency (str): Currency code; defaults to 'USD'.
+        category (str): Transaction category; optional.
+        description (str): Additional expense details; optional.
+    
+    Raises:
+        ValueError: If amount is invalid or exceeds balance.
+    """
     if currency == "USD":
         wallet.add_expense(amount)
     else:
@@ -40,7 +70,17 @@ def add_expense(user_id, wallet, amount, currency="USD", category=None, descript
 
 
 def export_transactions_to_csv(user_id):
-    """Export user's transaction history to csv."""
+    """Export user's complete transaction history to a CSV file.
+    
+    Args:
+        user_id (int): The ID of the user.
+    
+    Returns:
+        str: The filename of the exported CSV file.
+    
+    Raises:
+        ValueError: If no transactions exist for the user.
+    """
     transactions = _tx_repo.get_all_transactions(user_id)
 
     if not transactions:

@@ -7,6 +7,12 @@ from getpass import getpass
 
 
 def main():
+    """Main entry point for the wallet CLI application.
+    
+    Handles the main event loop for user authentication, wallet management,
+    and transaction operations. Allows users to log in, create accounts,
+    add transactions, and export transaction history.
+    """
     print("\n" + "="*50)
     print("💰 Welcome to Wallet 💰".center(50))
     print("="*50)
@@ -54,7 +60,13 @@ def main():
 
 
 def log_in():
-    """Ask for username and password, returns (user_id, username) if correct, else None."""
+    """Authenticate user with username and password.
+    
+    Prompts user to enter credentials and validates against the database.
+    
+    Returns:
+        tuple: (user_id, username) if authentication succeeds, None otherwise.
+    """
     print("\n" + "-" * 50)
     print("LOGIN".center(50))
     print("-" * 50 + "\n")
@@ -67,7 +79,14 @@ def log_in():
 
 
 def create_user():
-    """Create user by entering username and password. Returns (user_id, username, True)."""
+    """Create a new user account with username and password.
+    
+    Prompts for username (with duplicate checking), password, and confirmation.
+    Validates that passwords match before creating account.
+    
+    Returns:
+        tuple: (user_id, username, True) where True indicates successful login.
+    """
     print("\n" + "-" * 50)
     print("CREATE USER".center(50))
     print("-" * 50 + "\n")
@@ -96,13 +115,27 @@ def create_user():
 
 
 def ask_amount(user_id):
-    """Ask for initial balance and create wallet."""
+    """Prompt user for initial wallet balance and create wallet.
+    
+    Args:
+        user_id (int): The ID of the user to create a wallet for.
+    """
     amount = get_amount_input("Enter initial balance:\n", allow_zero=True)
     user_service.create_wallet(user_id, amount)
 
 
 def get_amount_input(prompt="Enter amount: ", allow_zero=False):
-    """Get and validate amount input from user."""
+    """Get and validate numeric amount input from user.
+    
+    Repeatedly prompts user until a valid positive number is entered.
+    
+    Args:
+        prompt (str): The message to display when asking for input.
+        allow_zero (bool): If True, allows zero as valid input; defaults to False.
+    
+    Returns:
+        float: A valid positive amount entered by the user.
+    """
     while True:
         amount = input(prompt)
         try:
@@ -116,7 +149,14 @@ def get_amount_input(prompt="Enter amount: ", allow_zero=False):
 
 
 def ask_transaction():
-    """Infinite loop except 0. Ask for transactions."""
+    """Display main menu and get user's transaction choice.
+    
+    Repeatedly prompts until user selects a valid option:
+    1. Add income, 2. Add expense, 3. Change user, 4. Save transactions, 0. Exit
+    
+    Returns:
+        int: The user's selected action (0-4).
+    """
     while True:
         print("\n" + "=" * 50)
         print("MAIN MENU".center(50))
@@ -133,7 +173,16 @@ def ask_transaction():
 
 
 def make_transaction(user_id, wallet, action):
-    """Make income or expense transaction."""
+    """Process a financial transaction (income or expense).
+    
+    Handles income/expense entry with validation, category selection,
+    and updates both the wallet and database.
+    
+    Args:
+        user_id (int): The ID of the user making the transaction.
+        wallet (Wallet): The user's wallet object to update.
+        action (int): Transaction type: 1 for income, 2 for expense, 4 for export.
+    """
     if action == 1:
         amount = get_amount_input("\nEnter income amount: ")
         try:
