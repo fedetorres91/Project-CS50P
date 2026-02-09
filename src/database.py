@@ -6,8 +6,11 @@ from src.models import Wallet
 """ CREATE DATABASE 
  SCHEMA:
  table users (id, username,  password)
- table wallet (user_id, balance, currency)
+ table wallet (user_id, balance, creation_date, currency)
  table transactions(id, user_id, tx_type, date, amount, currency, category, description, balance_after)"""
+
+# TODO unit testing
+
 
 # Create empty database file if it doesn't exist
 if not os.path.exists("wallet.db"):
@@ -18,8 +21,12 @@ db = SQL("sqlite:///wallet.db")
 # open db
 db = SQL("sqlite:///wallet.db")
 # CREATE TABLES
+# users
 db.execute("CREATE TABLE IF NOT EXISTS users (id INTEGER, username TEXT NOT NULL UNIQUE, password TEXT NOT NULL, PRIMARY KEY (id));")
-db.execute("CREATE TABLE IF NOT EXISTS wallet (user_id INTEGER NOT NULL, balance FLOAT NOT NULL, currency TEXT, FOREIGN KEY (user_id) REFERENCES users (id));")
+# wallet
+db.execute("CREATE TABLE IF NOT EXISTS wallet (user_id INTEGER NOT NULL, balance FLOAT NOT NULL, creation_date DATETIME NOT NULL, currency TEXT, FOREIGN KEY (user_id) REFERENCES users (id));")
+
+# transactions
 db.execute("CREATE TABLE IF NOT EXISTS transactions (id INTEGER, user_id INTEGER, tx_type TEXT NOT NULL, date DATETIME NOT NULL, amount FLOAT NOT NULL, currency TEXT, category TEXT, description TEXT, balance_after FLOAT NOT NULL, PRIMARY KEY(id), FOREIGN KEY (user_id) REFERENCES users(id));")
 
 # repositories/wallet_repository.py
@@ -36,10 +43,11 @@ class WalletRepository:
         Args:
             user_id (int): The ID of the user.
             initial_balance (float): The starting balance for the wallet.
+            
         """
         db.execute(
-            "INSERT INTO wallet (user_id, balance) VALUES (?, ?)",
-            user_id, initial_balance
+            "INSERT INTO wallet (user_id, balance, creation_date) VALUES (?, ?, ?)",
+            user_id, initial_balance, datetime.now().isoformat()
         )
         
     def load(self, user_id: int) -> Wallet:
@@ -49,12 +57,12 @@ class WalletRepository:
             user_id (int): The ID of the user.
         
         Returns:
-            Wallet: A wallet object with the user's current balance.
+            Wallet: A wallet object with the user's current balance and creation date
         """
         row = db.execute(
-            "SELECT balance FROM wallet WHERE user_id = ?", user_id
+            "SELECT balance, creation_date FROM wallet WHERE user_id = ?", user_id
         )[0]
-        return Wallet(balance=row["balance"])
+        return Wallet(balance=row["balance"], creation_date=row["creation_date"])
 
     def save(self, user_id: int, wallet: Wallet):
         """Update wallet balance in the database.
@@ -128,4 +136,23 @@ class TransactionRepository:
             user_id
         )
         return rows if rows else []
+    
+    def transaction_summary(self, user_id):
+        """Returns amount of transaction per category.
+        
+        Args: user_id (int): The ID of the user.
+        
+        Returns: List of categoriese, amount. If there is none returns empty list.
+            """
+        transactions_categories = db.execute(
+            "SELECT category, SUM(amount) AS total_amount" 
+            " FROM transactions WHERE user_id = ? AND tx_type = ?" 
+            " GROUP BY category", 
+            user_id, "expense"
+        )
+
+        return transactions_categories
+        
+        
+        
         

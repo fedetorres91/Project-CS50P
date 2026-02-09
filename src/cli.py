@@ -152,10 +152,10 @@ def ask_transaction():
     """Display main menu and get user's transaction choice.
     
     Repeatedly prompts until user selects a valid option:
-    1. Add income, 2. Add expense, 3. Change user, 4. Save transactions, 0. Exit
+    1. Add income, 2. Add expense, 3. Change user, 4. Save transactions, 5. Get balance history, 6. Save transaction categories summary, 0. Exit
     
     Returns:
-        int: The user's selected action (0-4).
+        int: The user's selected action (0-6).
     """
     while True:
         print("\n" + "=" * 50)
@@ -165,9 +165,11 @@ def ask_transaction():
                        "2. Add an expense\n"
                        "3. Change user\n"
                        "4. Save transaction history\n"
+                       "5. Save balance history\n"
+                       "6. Save transaction categories summary\n"
                        "0. Exit\n"
                        "\nSelect option: ")
-        if action in ("0", "1", "2", "3", "4"):
+        if action in ("0", "1", "2", "3", "4", "5", "6"):
             break
     return int(action)
 
@@ -207,7 +209,14 @@ def make_transaction(user_id, wallet, action):
             category_menu += f"{i}. {cat}\n"
         category_menu += f"{len(CATEGORIES) + 1}. Other\n"
         
-        category = input(category_menu + "Select category: ")
+        category_choice = input(category_menu + "Select category: ")
+
+        # Convert number to category name (IMPORTANT!)
+        if int(category_choice) <= len(CATEGORIES):
+            category = CATEGORIES[int(category_choice) - 1]
+        else:
+            category = "Other"
+
         description = input("Add description (or press enter to skip): ")
         
         try: 
@@ -217,6 +226,29 @@ def make_transaction(user_id, wallet, action):
             print(f"\n✗ Error: {e}\n")
         return
     
+    elif action == 3:
+        # change user
+
+        logged_in = False
+        while logged_in == False:
+            result = log_in()
+            if result:
+                user_id, username = result
+                print(f"\n✓ Welcome back {username}!\n")
+                wallet = user_service.load_wallet(user_id)
+                logged_in = True
+            else:
+                print("\n✗ Incorrect username or password.\n")
+            
+            # ask for transaction.
+        while True:
+            action = ask_transaction()
+            if action != 0:
+                make_transaction(user_id, wallet, action)
+            else:
+                print("Program exited.")
+                exit(0)
+
     elif action == 4:
         try:
             services.export_transactions_to_csv(user_id)
@@ -224,6 +256,19 @@ def make_transaction(user_id, wallet, action):
         except ValueError:
             print("\n✗ Transaction history is empty.\n")
 
+    elif action == 5:
+        try:
+            services.save_balance_history(user_id)
+            print("\n✓ Balance history graph saved.\n")
+        except ValueError:
+            print("\n✗ Transaction history is empty.\n")
+
+    elif action == 6:
+        try:
+            services.save_transactions(user_id)
+            print("\n✓ Balance history graph saved.\n")
+        except ValueError:
+            print("\n✗ Transaction history is empty.\n")
     else:
         return
 

@@ -50,16 +50,18 @@ class Wallet:
     Tracks balance and provides methods to add income and expenses
     with automatic validation.
     """
-    def __init__(self, balance=0):
+    def __init__(self, balance=0, creation_date=None):
         """Initialize a wallet with an optional starting balance.
         
         Args:
             balance (float): The initial balance; defaults to 0.
+            creation_date(datetime): Date of wallet creation.
         
         Raises:
             ValueError: If balance is negative or not a number.
         """
         self.balance = balance
+        self.creation_date = creation_date
 
     # getter
     @property
