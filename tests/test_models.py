@@ -1,5 +1,5 @@
 import pytest
-from models import Wallet, Transactions
+from src.models import Wallet, Transactions
 
 # test wallet class
 

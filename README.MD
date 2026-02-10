@@ -1,6 +1,5 @@
 Command line program that permits a user to create a wallet, make transactions, output transactions and wallet info on a csv file and some matplot graphs.
 TODO 13-14/1 unit tests
-TODO matplot graphs
 
 
 ## Installation

@@ -28,10 +28,11 @@ def main():
             option = input("1. Log in\n"
                            "2. Create user\n"
                            "0. Exit program\n"
-                           "\nSelect option: ")
+                           "\nSelect option: ").strip()
             if option in ("1", "2", "0"):
                 break
-        if int(option) == 1:
+            print("Please select a valid option.")
+        if option == "1":
             result = log_in()
             if result:
                 user_id, username = result
@@ -40,7 +41,7 @@ def main():
                 logged_in = True
             else:
                 print("\n✗ Incorrect username or password.\n")
-        elif int(option) == 2:
+        elif option == "2":
             user_id, username, logged_in = create_user()
             print(f"\n✓ User created successfully. Welcome {username}!\n")
             ask_amount(user_id)
@@ -171,6 +172,7 @@ def ask_transaction():
                        "\nSelect option: ")
         if action in ("0", "1", "2", "3", "4", "5", "6"):
             break
+        print("Please select a valid option.")
     return int(action)
 
 
@@ -209,11 +211,19 @@ def make_transaction(user_id, wallet, action):
             category_menu += f"{i}. {cat}\n"
         category_menu += f"{len(CATEGORIES) + 1}. Other\n"
         
-        category_choice = input(category_menu + "Select category: ")
+        while True:
+            category_choice = input(category_menu + "Select category: ").strip()
+            if not category_choice.isdigit():
+                print("Please enter a number.")
+                continue
+            choice_num = int(category_choice)
+            if 1 <= choice_num <= len(CATEGORIES) + 1:
+                break
+            print("Please select a valid category number.")
 
         # Convert number to category name (IMPORTANT!)
-        if int(category_choice) <= len(CATEGORIES):
-            category = CATEGORIES[int(category_choice) - 1]
+        if choice_num <= len(CATEGORIES):
+            category = CATEGORIES[choice_num - 1]
         else:
             category = "Other"
 
@@ -271,7 +281,3 @@ def make_transaction(user_id, wallet, action):
             print("\n✗ Transaction history is empty.\n")
     else:
         return
-
-
-# TODO
-# print matplot lib of transaction category and balance history
