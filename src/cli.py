@@ -53,11 +53,13 @@ def main():
     # ask for transaction.
     while True:
         action = ask_transaction()
-        if action != 0:
-            make_transaction(user_id, wallet, action)
-        else:
+        if action == 0:
             print("Program exited.")
             break
+        if action == 3:
+            user_id, wallet = change_user()
+            continue
+        make_transaction(user_id, wallet, action)
 
 
 def log_in():
@@ -71,11 +73,17 @@ def log_in():
     print("\n" + "-" * 50)
     print("LOGIN".center(50))
     print("-" * 50 + "\n")
-    username, password = None, None
-    while username is None:
-        username = input("Enter username: ")
-    while password is None:
+    while True:
+        username = input("Enter username: ").strip()
+        if username:
+            break
+        print("✗ Username cannot be empty.\n")
+
+    while True:
         password = getpass("Enter password: ")
+        if password:
+            break
+        print("✗ Password cannot be empty.\n")
     return user_service.log_in(username, password)
 
 
@@ -91,20 +99,29 @@ def create_user():
     print("\n" + "-" * 50)
     print("CREATE USER".center(50))
     print("-" * 50 + "\n")
-    username, password = None, None
-
-    while username is None:
-        username = input("Create username: ")
+    while True:
+        username = input("Create username: ").strip()
+        if not username:
+            print("✗ Username cannot be empty.\n")
+            continue
         if user_service.username_exists(username):
-            print(f"✗ Username already exists.\n")
-            username = None
+            print("✗ Username already exists.\n")
+            continue
+        break
 
     # create password
-    while password is None:
+    while True:
         password = getpass("Choose a password: ")
+        if password:
+            break
+        print("✗ Password cannot be empty.\n")
+
     password_confirmed = False
     while not password_confirmed:
         confirmed = getpass("Confirm password: ")
+        if not confirmed:
+            print("✗ Password cannot be empty.\n")
+            continue
         if confirmed != password:
             print("✗ Passwords don't match. Try again.\n")
         else:
@@ -176,6 +193,17 @@ def ask_transaction():
     return int(action)
 
 
+def change_user():
+    """Authenticate and return a new active user and wallet."""
+    while True:
+        result = log_in()
+        if result:
+            user_id, username = result
+            print(f"\n✓ Welcome back {username}!\n")
+            return user_id, user_service.load_wallet(user_id)
+        print("\n✗ Incorrect username or password.\n")
+
+
 def make_transaction(user_id, wallet, action):
     """Process a financial transaction (income or expense).
     
@@ -236,29 +264,6 @@ def make_transaction(user_id, wallet, action):
             print(f"\n✗ Error: {e}\n")
         return
     
-    elif action == 3:
-        # change user
-
-        logged_in = False
-        while logged_in == False:
-            result = log_in()
-            if result:
-                user_id, username = result
-                print(f"\n✓ Welcome back {username}!\n")
-                wallet = user_service.load_wallet(user_id)
-                logged_in = True
-            else:
-                print("\n✗ Incorrect username or password.\n")
-            
-            # ask for transaction.
-        while True:
-            action = ask_transaction()
-            if action != 0:
-                make_transaction(user_id, wallet, action)
-            else:
-                print("Program exited.")
-                exit(0)
-
     elif action == 4:
         try:
             services.export_transactions_to_csv(user_id)
@@ -276,7 +281,7 @@ def make_transaction(user_id, wallet, action):
     elif action == 6:
         try:
             services.save_transactions(user_id)
-            print("\n✓ Balance history graph saved.\n")
+            print("\n✓ Transaction categories summary saved.\n")
         except ValueError:
             print("\n✗ Transaction history is empty.\n")
     else:

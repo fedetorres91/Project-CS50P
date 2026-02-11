@@ -6,6 +6,11 @@ from src.models import Wallet
 
 # DB auth helpers
 
+def _normalized_username(username: str) -> str:
+    """Normalize username input for DB operations."""
+    return username.strip() if isinstance(username, str) else ""
+
+
 def username_exists(username: str) -> bool:
     """Check if a username already exists in the database.
     
@@ -15,6 +20,9 @@ def username_exists(username: str) -> bool:
     Returns:
         bool: True if username exists, False otherwise.
     """
+    username = _normalized_username(username)
+    if not username:
+        return False
     result = db.execute("SELECT username FROM users WHERE username = ?", username)
     return len(result) > 0
 
@@ -29,6 +37,12 @@ def create_user(username: str, password: str) -> int:
     Returns:
         int: The user ID of the newly created user.
     """
+    username = _normalized_username(username)
+    if not username:
+        raise ValueError("Username cannot be empty.")
+    if not isinstance(password, str) or not password:
+        raise ValueError("Password cannot be empty.")
+
     hashed_password = generate_password_hash(password)
     db.execute("INSERT INTO users (username, password) VALUES (?, ?)", username, hashed_password)
     user_row = db.execute("SELECT id FROM users WHERE username = ?", username)[0]
@@ -45,6 +59,10 @@ def log_in(username: str, password: str):
     Returns:
         tuple: (user_id, username) if authentication succeeds, None if credentials invalid.
     """
+    username = _normalized_username(username)
+    if not username or not isinstance(password, str) or not password:
+        return None
+
     rows = db.execute("SELECT id, username, password FROM users WHERE username = ?", username)
     if not rows:
         return None

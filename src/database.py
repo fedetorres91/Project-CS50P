@@ -1,33 +1,32 @@
-import os
 from datetime import datetime
 from cs50 import SQL
 from src.models import Wallet
 
-""" CREATE DATABASE 
- SCHEMA:
- table users (id, username,  password)
- table wallet (user_id, balance, creation_date, currency)
- table transactions(id, user_id, tx_type, date, amount, currency, category, description, balance_after)"""
+DB_URL = "sqlite:///wallet.db"
 
-# TODO unit testing
+def _init_db(database):
+    """Create DB schema when tables do not exist."""
+    database.execute(
+        "CREATE TABLE IF NOT EXISTS users ("
+        "id INTEGER, username TEXT NOT NULL UNIQUE, password TEXT NOT NULL, "
+        "PRIMARY KEY (id));"
+    )
+    database.execute(
+        "CREATE TABLE IF NOT EXISTS wallet ("
+        "user_id INTEGER NOT NULL, balance FLOAT NOT NULL, "
+        "creation_date DATETIME NOT NULL, currency TEXT, "
+        "FOREIGN KEY (user_id) REFERENCES users (id));"
+    )
+    database.execute(
+        "CREATE TABLE IF NOT EXISTS transactions ("
+        "id INTEGER, user_id INTEGER, tx_type TEXT NOT NULL, "
+        "date DATETIME NOT NULL, amount FLOAT NOT NULL, currency TEXT, "
+        "category TEXT, description TEXT, balance_after FLOAT NOT NULL, "
+        "PRIMARY KEY(id), FOREIGN KEY (user_id) REFERENCES users(id));"
+    )
 
-
-# Create empty database file if it doesn't exist
-if not os.path.exists("wallet.db"):
-    open("wallet.db", "a").close()
-
-db = SQL("sqlite:///wallet.db")
-
-# open db
-db = SQL("sqlite:///wallet.db")
-# CREATE TABLES
-# users
-db.execute("CREATE TABLE IF NOT EXISTS users (id INTEGER, username TEXT NOT NULL UNIQUE, password TEXT NOT NULL, PRIMARY KEY (id));")
-# wallet
-db.execute("CREATE TABLE IF NOT EXISTS wallet (user_id INTEGER NOT NULL, balance FLOAT NOT NULL, creation_date DATETIME NOT NULL, currency TEXT, FOREIGN KEY (user_id) REFERENCES users (id));")
-
-# transactions
-db.execute("CREATE TABLE IF NOT EXISTS transactions (id INTEGER, user_id INTEGER, tx_type TEXT NOT NULL, date DATETIME NOT NULL, amount FLOAT NOT NULL, currency TEXT, category TEXT, description TEXT, balance_after FLOAT NOT NULL, PRIMARY KEY(id), FOREIGN KEY (user_id) REFERENCES users(id));")
+db = SQL(DB_URL)
+_init_db(db)
 
 # repositories/wallet_repository.py
 
