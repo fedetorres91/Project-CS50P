@@ -1,12 +1,14 @@
 """Integrates Wallet domain with persistence."""
 
-import logging
-from src.models import Wallet, Transactions, convert_currency
-from src.database import WalletRepository, TransactionRepository
 import csv
+import logging
+import os
+from datetime import datetime
 import matplotlib
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
+from src.models import Wallet, Transactions, convert_currency
+from src.database import WalletRepository, TransactionRepository
 
 # Suppress matplotlib debug messages
 matplotlib.set_loglevel("warning")
@@ -97,6 +99,7 @@ def export_transactions_to_csv(user_id):
         raise ValueError(f"No transactions found for {user_id}")
     
     # create and save csv file to data folder
+    os.makedirs("data", exist_ok=True)
     filename = f"data/{user_id}_transactions_history.csv"
     with open(filename, "w") as f:
         writer = csv.DictWriter(f, fieldnames=transactions[0].keys())
@@ -151,10 +154,6 @@ def get_balance_history(user_id):
 
     return balance_history
 
-import matplotlib.pyplot as plt
-from datetime import datetime
-
-# ...existing code...
 
 def save_balance_history(user_id):
     """Save a matplotlib graph with balance history.
@@ -188,8 +187,9 @@ def save_balance_history(user_id):
     plt.gca().xaxis.set_major_locator(mdates.AutoDateLocator())
 
     plt.tight_layout()
-    
+
     # Save the figure
+    os.makedirs("data", exist_ok=True)
     filename = f"data/{user_id}_balance_history.png"
     plt.savefig(filename)
     plt.close()
@@ -208,8 +208,6 @@ def save_transactions(user_id):
     if not transactions_categories:
         raise ValueError(f"No transactions found for {user_id}")
 
-    import matplotlib.pyplot as plt
-
     labels = [t['category'] for t in transactions_categories]
     sizes = [t['total_amount'] for t in transactions_categories]
 
@@ -218,7 +216,8 @@ def save_transactions(user_id):
 
     colors = plt.cm.Set3.colors[:len(sizes)]
 
-    filename = f"transactions_{user_id}.png"
+    os.makedirs("data", exist_ok=True)
+    filename = f"data/{user_id}_transactions_categories.png"
 
     def autopct(pct):
         total = sum(sizes)
@@ -235,7 +234,7 @@ def save_transactions(user_id):
     )
     plt.axis("equal")
 
-    plt.savefig(f"transactions_{user_id}.png", bbox_inches="tight")
+    plt.savefig(filename, bbox_inches="tight")
     plt.close()
 
     return filename
