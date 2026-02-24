@@ -143,6 +143,7 @@ def test_save_balance_history_empty_raises(temp_db):
 
 def test_save_transactions_success(temp_db, tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
+    os.makedirs("data", exist_ok=True)
 
     temp_db.execute("INSERT INTO users (username, password) VALUES (?, ?)", "alice", "hash")
     user_id = temp_db.execute("SELECT id FROM users WHERE username = ?", "alice")[0]["id"]
@@ -151,8 +152,8 @@ def test_save_transactions_success(temp_db, tmp_path, monkeypatch):
     src.services.add_expense(user_id, wallet, 100, category="Food", description="meal")
     src.services.add_expense(user_id, wallet, 200, category="House", description="rent")
 
-    src.services.save_transactions(user_id)
-    filename = f"transactions_{user_id}.png"
+    filename = src.services.save_transactions(user_id)
+    assert filename == f"data/{user_id}_transactions_categories.png"
     assert os.path.exists(filename)
     assert os.path.getsize(filename) > 0
 

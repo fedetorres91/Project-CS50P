@@ -4,6 +4,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from src.database import db, WalletRepository
 from src.models import Wallet
 
+MIN_PASSWORD_LENGTH = 8
+
 # DB auth helpers
 
 def _normalized_username(username: str) -> str:
@@ -42,6 +44,8 @@ def create_user(username: str, password: str) -> int:
         raise ValueError("Username cannot be empty.")
     if not isinstance(password, str) or not password:
         raise ValueError("Password cannot be empty.")
+    if len(password) < MIN_PASSWORD_LENGTH:
+        raise ValueError(f"Password must be at least {MIN_PASSWORD_LENGTH} characters.")
 
     hashed_password = generate_password_hash(password)
     db.execute("INSERT INTO users (username, password) VALUES (?, ?)", username, hashed_password)
@@ -77,19 +81,6 @@ def log_in(username: str, password: str):
 # Wallet helpers
 
 _wallet_repo = WalletRepository()
-
-def create_wallet(user_id: int, initial_balance: float) -> Wallet:
-    """Create a new wallet for a user with an initial balance.
-    
-    Args:
-        user_id (int): The ID of the user.
-        initial_balance (float): The starting balance for the wallet.
-    
-    Returns:
-        Wallet: The newly created wallet object.
-    """
-    _wallet_repo.create_wallet(user_id, initial_balance)
-    return _wallet_repo.load(user_id)
 
 
 def load_wallet(user_id: int) -> Wallet:

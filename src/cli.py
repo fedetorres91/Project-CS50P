@@ -57,7 +57,9 @@ def main():
             print("Program exited.")
             break
         if action == 3:
-            user_id, wallet = change_user()
+            result = change_user()
+            if result:
+                user_id, wallet = result
             continue
         make_transaction(user_id, wallet, action)
 
@@ -111,10 +113,14 @@ def create_user():
 
     # create password
     while True:
-        password = getpass("Choose a password: ")
-        if password:
-            break
-        print("✗ Password cannot be empty.\n")
+        password = getpass("Choose a password (min 8 characters): ")
+        if not password:
+            print("✗ Password cannot be empty.\n")
+            continue
+        if len(password) < 8:
+            print("✗ Password must be at least 8 characters.\n")
+            continue
+        break
 
     password_confirmed = False
     while not password_confirmed:
@@ -134,12 +140,12 @@ def create_user():
 
 def ask_amount(user_id):
     """Prompt user for initial wallet balance and create wallet.
-    
+
     Args:
         user_id (int): The ID of the user to create a wallet for.
     """
     amount = get_amount_input("Enter initial balance:\n", allow_zero=True)
-    user_service.create_wallet(user_id, amount)
+    services.create_wallet(user_id, amount)
 
 
 def get_amount_input(prompt="Enter amount: ", allow_zero=False):
@@ -194,7 +200,7 @@ def ask_transaction():
 
 
 def change_user():
-    """Authenticate and return a new active user and wallet."""
+    """Authenticate and return a new active user and wallet, or None to cancel."""
     while True:
         result = log_in()
         if result:
@@ -202,6 +208,9 @@ def change_user():
             print(f"\n✓ Welcome back {username}!\n")
             return user_id, user_service.load_wallet(user_id)
         print("\n✗ Incorrect username or password.\n")
+        retry = input("Try again? (y/n): ").strip().lower()
+        if retry != "y":
+            return None
 
 
 def make_transaction(user_id, wallet, action):

@@ -45,7 +45,7 @@ def test_log_in_uses_user_service(monkeypatch):
 
 def test_create_user_retries_duplicate_and_password_confirmation(monkeypatch):
     usernames = iter(["alice", "bob"])
-    passwords = iter(["secret", "wrong", "secret"])
+    passwords = iter(["secret12", "wrongpass", "secret12"])
 
     monkeypatch.setattr("builtins.input", lambda _="": next(usernames))
     monkeypatch.setattr(cli, "getpass", lambda _="": next(passwords))
@@ -67,12 +67,12 @@ def test_create_user_retries_duplicate_and_password_confirmation(monkeypatch):
 
     assert result == (7, "bob", True)
     assert calls["username_exists"] == 2
-    assert calls["create_user"] == [("bob", "secret")]
+    assert calls["create_user"] == [("bob", "secret12")]
 
 
 def test_create_user_retries_on_empty_username_and_password(monkeypatch):
     usernames = iter(["   ", "bob"])
-    passwords = iter(["", "secret", "", "secret"])
+    passwords = iter(["", "secret12", "", "secret12"])
 
     monkeypatch.setattr("builtins.input", lambda _="": next(usernames))
     monkeypatch.setattr(cli, "getpass", lambda _="": next(passwords))
@@ -92,7 +92,7 @@ def test_ask_amount_creates_wallet(monkeypatch):
     def fake_create_wallet(user_id, amount):
         captured["args"] = (user_id, amount)
 
-    monkeypatch.setattr(cli.user_service, "create_wallet", fake_create_wallet)
+    monkeypatch.setattr(cli.services, "create_wallet", fake_create_wallet)
 
     cli.ask_amount(3)
 
@@ -160,10 +160,20 @@ def test_make_transaction_export_handles_empty_history(monkeypatch):
     cli.make_transaction(9, DummyWallet(balance=0), 4)
 
 
+def test_change_user_cancel(monkeypatch):
+    monkeypatch.setattr(cli, "log_in", lambda: None)
+    monkeypatch.setattr("builtins.input", lambda _prompt="": "n")
+
+    result = cli.change_user()
+
+    assert result is None
+
+
 def test_change_user_retries_until_success(monkeypatch):
     calls = iter([None, (8, "alice")])
     monkeypatch.setattr(cli, "log_in", lambda: next(calls))
     monkeypatch.setattr(cli.user_service, "load_wallet", lambda _uid: DummyWallet(balance=77))
+    monkeypatch.setattr("builtins.input", lambda _prompt="": "y")
 
     user_id, wallet = cli.change_user()
 

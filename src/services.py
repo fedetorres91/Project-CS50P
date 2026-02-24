@@ -7,59 +7,54 @@ from datetime import datetime
 import matplotlib
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
-from src.models import Wallet, Transactions, convert_currency
+from src.models import Wallet, Transaction, convert_currency
 from src.database import WalletRepository, TransactionRepository
 
 # Suppress matplotlib debug messages
 matplotlib.set_loglevel("warning")
 logging.getLogger('matplotlib.font_manager').setLevel(logging.WARNING)
 
-
-#TODO unit testing
 _wallet_repo = WalletRepository()
 _tx_repo = TransactionRepository()
 
 
 def create_wallet(user_id, amount):
     """Create and persist a new wallet for a user.
-    
+
     Args:
         user_id (int): The ID of the user.
         amount (float): The initial wallet balance.
-    
+
     Returns:
         Wallet: The newly created wallet object.
     """
-    wallet = Wallet(amount)
     _wallet_repo.create_wallet(user_id, amount)
-    return wallet
+    return _wallet_repo.load(user_id)
 
 
 def add_income(user_id, wallet, amount, currency="USD"):
     """Record income transaction and update wallet balance in database.
-    
+
     Args:
         user_id (int): The ID of the user.
         wallet (Wallet): The user's wallet object.
         amount (float): The income amount.
         currency (str): Currency code; defaults to 'USD'.
-    
+
     Raises:
         ValueError: If amount is invalid.
     """
-    if currency == "USD":
-        wallet.add_income(amount)
-    else:
-        wallet.add_income(convert_currency(amount, currency, "USD"))
-
+    usd_amount = amount if currency == "USD" else convert_currency(amount, currency, "USD")
+    tx = Transaction("income", usd_amount, currency)
+    wallet.add_income(tx.amount)
     balance_after = wallet.balance
-    _tx_repo.save_income(user_id, amount, balance_after)
+    _tx_repo.save_income(user_id, tx.amount, balance_after)
     _wallet_repo.save(user_id, wallet)
 
 
 def add_expense(user_id, wallet, amount, currency="USD", category=None, description=None):
     """Record expense transaction and update wallet balance in database.
-    
+
     Args:
         user_id (int): The ID of the user.
         wallet (Wallet): The user's wallet object.
@@ -67,17 +62,15 @@ def add_expense(user_id, wallet, amount, currency="USD", category=None, descript
         currency (str): Currency code; defaults to 'USD'.
         category (str): Transaction category; optional.
         description (str): Additional expense details; optional.
-    
+
     Raises:
         ValueError: If amount is invalid or exceeds balance.
     """
-    if currency == "USD":
-        wallet.add_expense(amount)
-    else:
-        wallet.add_expense(convert_currency(amount, currency, "USD"))
-
+    usd_amount = amount if currency == "USD" else convert_currency(amount, currency, "USD")
+    tx = Transaction("expense", usd_amount, currency, category, description)
+    wallet.add_expense(tx.amount)
     balance_after = wallet.balance
-    _tx_repo.save_expense(user_id, amount, category, description, balance_after)
+    _tx_repo.save_expense(user_id, tx.amount, category, description, balance_after)
     _wallet_repo.save(user_id, wallet)
 
 

@@ -1,5 +1,5 @@
 import pytest
-from src.models import Wallet, Transactions
+from src.models import Wallet, Transaction, convert_currency
 
 # test wallet class
 
@@ -72,21 +72,31 @@ def test_incorrect_expense():
     with pytest.raises(ValueError):
         w.add_expense(-10)
 
-# test transatcions
+# test transactions
 
 def test_correct_transaction():
-    t1 = Transactions("income", 10)
-    t2 = Transactions("expense", 20)
+    t1 = Transaction("income", 10)
+    t2 = Transaction("expense", 20)
     assert t1.amount == 10
     assert t2.amount == 20
+
 def test_incorrect_tx_type():
     with pytest.raises(ValueError):
-        t = Transactions("gastos", 10)
+        Transaction("gastos", 10)
+
 def test_incorrect_amount():
     with pytest.raises(TypeError):
-        t = Transactions("income")
+        Transaction("income")
     with pytest.raises(ValueError):
-        t = Transactions("income", "ten")
+        Transaction("income", "ten")
+
+# test convert_currency
+
+def test_convert_currency_uyu_to_usd():
+    assert convert_currency(40, "UYU", "USD") == 1.0
+
+def test_convert_currency_large_amount():
+    assert convert_currency(400, "UYU", "USD") == 10.0
 
 
 

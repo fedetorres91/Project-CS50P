@@ -1,10 +1,12 @@
 from datetime import datetime
+from pathlib import Path
 from cs50 import SQL
 from src.models import Wallet
 
-DB_URL = "sqlite:///wallet.db"
+DB_URL = "sqlite:///" + str(Path(__file__).resolve().parent.parent / "wallet.db")
 
-def _init_db(database):
+
+def init_db(database):
     """Create DB schema when tables do not exist."""
     database.execute(
         "CREATE TABLE IF NOT EXISTS users ("
@@ -26,7 +28,7 @@ def _init_db(database):
     )
 
 db = SQL(DB_URL)
-_init_db(db)
+init_db(db)
 
 # repositories/wallet_repository.py
 
@@ -45,8 +47,8 @@ class WalletRepository:
             
         """
         db.execute(
-            "INSERT INTO wallet (user_id, balance, creation_date) VALUES (?, ?, ?)",
-            user_id, initial_balance, datetime.now().isoformat()
+            "INSERT INTO wallet (user_id, balance, creation_date, currency) VALUES (?, ?, ?, ?)",
+            user_id, initial_balance, datetime.now().isoformat(), "USD"
         )
         
     def load(self, user_id: int) -> Wallet:

@@ -1,13 +1,7 @@
-"""Wallet and transaction class"""
-
-# TODO 10/1
-# check correct balance and values if not raise errors
+"""Wallet and transaction domain models."""
 
 CATEGORIES = ("Food", "House", "Bills", "Shopping", "Leisure", "Travel")
 
-# convert currencies
-# TODO add API to get current value
-# https://exchangeratesapi.io/
 
 def convert_currency(amount, from_c, to_c):
     """Convert amount from one currency to another.
@@ -26,7 +20,7 @@ def convert_currency(amount, from_c, to_c):
         TODO: Integrate live exchange rate API for dynamic conversion rates.
     """
     if from_c == "UYU" and to_c == "USD":
-        return amount*40.0
+        return amount / 40.0
 
 def valid_amount(amount):
     """Validate that an amount is a positive number.
@@ -78,7 +72,7 @@ class Wallet:
         Raises:
             ValueError: If value is negative or not a number.
         """
-        if not isinstance(value, (int, float)) or value < 0:
+        if not isinstance(value, (int, float)) or isinstance(value, bool) or value < 0:
             raise ValueError("Balance must be a non-negative number")
         self._balance = value
 
@@ -108,9 +102,9 @@ class Wallet:
             raise ValueError("Insufficient balance")
         self._balance -= amount
 
-class Transactions:
+class Transaction:
     """Represents a single financial transaction.
-    
+
     Stores transaction details including type, amount, currency, category,
     and optional description.
     """
