@@ -1,7 +1,7 @@
 # Wallet — Personal Finance Tracker
 
 A command-line application for tracking income, expenses, and balance history. Supports multiple users, secure authentication, and data export to CSV and charts.
-Had help on final implementations and modularity with Claude Code, while learning how to use an agent.
+Had help on final implementations, modularity logic and test units on cli and database with Claude Code, while learning how to use an agent.
 ## Features
 
 - Multi-user accounts with hashed password authentication
